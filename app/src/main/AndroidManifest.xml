@@ -136,16 +136,6 @@
 		</activity>
 
 		<activity
-			android:name=".ColorsActivity"
-			android:configChanges="keyboardHidden|orientation"
-			android:label="@string/title_colors">
-
-			<meta-data
-				android:name="android.support.PARENT_ACTIVITY"
-				android:value="org.connectbot.HostListActivity"/>
-		</activity>
-
-		<activity
 			android:name=".EulaActivity"
 			android:configChanges="keyboardHidden|orientation"
 			android:label="@string/terms_and_conditions">

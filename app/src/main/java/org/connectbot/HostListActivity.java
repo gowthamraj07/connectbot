@@ -17,6 +17,19 @@
 
 package org.connectbot;
 
+import java.util.List;
+
+import org.connectbot.bean.HostBean;
+import org.connectbot.data.HostStorage;
+import org.connectbot.service.OnHostStatusChangedListener;
+import org.connectbot.service.TerminalBridge;
+import org.connectbot.service.TerminalManager;
+import org.connectbot.transport.TransportFactory;
+import org.connectbot.util.HostDatabase;
+import org.connectbot.util.PreferenceConstants;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import android.annotation.TargetApi;
 import android.content.ComponentName;
 import android.content.Context;
@@ -31,15 +44,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import androidx.annotation.StyleRes;
-import androidx.annotation.VisibleForTesting;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
@@ -47,17 +55,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import org.connectbot.bean.HostBean;
-import org.connectbot.data.HostStorage;
-import org.connectbot.service.OnHostStatusChangedListener;
-import org.connectbot.service.TerminalBridge;
-import org.connectbot.service.TerminalManager;
-import org.connectbot.transport.TransportFactory;
-import org.connectbot.util.HostDatabase;
-import org.connectbot.util.PreferenceConstants;
-
-import java.util.List;
+import androidx.annotation.StyleRes;
+import androidx.annotation.VisibleForTesting;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class HostListActivity extends AppCompatListActivity implements OnHostStatusChangedListener {
 	public final static String TAG = "CB.HostListActivity";
@@ -91,7 +91,7 @@ public class HostListActivity extends AppCompatListActivity implements OnHostSta
 	 */
 	private boolean closeOnDisconnectAll = true;
 
-	private ServiceConnection connection = new ServiceConnection() {
+	private final ServiceConnection connection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			bound = ((TerminalManager.TerminalBinder) service).getService();
@@ -228,80 +228,6 @@ public class HostListActivity extends AppCompatListActivity implements OnHostSta
 		});
 
 		this.inflater = LayoutInflater.from(this);
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		super.onPrepareOptionsMenu(menu);
-
-		// don't offer menus when creating shortcut
-		if (makingShortcut) return true;
-
-		sortcolor.setVisible(!sortedByColor);
-		sortlast.setVisible(sortedByColor);
-		disconnectall.setEnabled(bound != null && bound.getBridges().size() > 0);
-
-		return true;
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-
-		// don't offer menus when creating shortcut
-		if (makingShortcut) return true;
-
-		// add host, ssh keys, about
-		sortcolor = menu.add(R.string.list_menu_sortcolor);
-		sortcolor.setIcon(android.R.drawable.ic_menu_share);
-		sortcolor.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-			@Override
-			public boolean onMenuItemClick(MenuItem item) {
-				sortedByColor = true;
-				updateList();
-				return true;
-			}
-		});
-
-		sortlast = menu.add(R.string.list_menu_sortname);
-		sortlast.setIcon(android.R.drawable.ic_menu_share);
-		sortlast.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-			@Override
-			public boolean onMenuItemClick(MenuItem item) {
-				sortedByColor = false;
-				updateList();
-				return true;
-			}
-		});
-
-		MenuItem keys = menu.add(R.string.list_menu_pubkeys);
-		keys.setIcon(android.R.drawable.ic_lock_lock);
-		keys.setIntent(new Intent(HostListActivity.this, PubkeyListActivity.class));
-
-		MenuItem colors = menu.add(R.string.title_colors);
-		colors.setIcon(android.R.drawable.ic_menu_slideshow);
-		colors.setIntent(new Intent(HostListActivity.this, ColorsActivity.class));
-
-		disconnectall = menu.add(R.string.list_menu_disconnect);
-		disconnectall.setIcon(android.R.drawable.ic_menu_delete);
-		disconnectall.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-			@Override
-			public boolean onMenuItemClick(MenuItem menuItem) {
-				disconnectAll();
-				return false;
-			}
-		});
-
-		MenuItem settings = menu.add(R.string.list_menu_settings);
-		settings.setIcon(android.R.drawable.ic_menu_preferences);
-		settings.setIntent(new Intent(HostListActivity.this, SettingsActivity.class));
-
-		MenuItem help = menu.add(R.string.title_help);
-		help.setIcon(android.R.drawable.ic_menu_help);
-		help.setIntent(new Intent(HostListActivity.this, HelpActivity.class));
-
-		return true;
-
 	}
 
 	/**
